@@ -1,0 +1,19 @@
+#  Local .terraform directories
+**/.terraform/*
+
+# .tfstate files
+*.tfstate
+*.tfstate.*
+
+# .tfvars files
+*.tfvars
+
+.idea/
+
+*.gz
+dist/
+
+**/__pycache__
+
+# node
+node_modules/
