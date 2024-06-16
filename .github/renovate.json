@@ -129,6 +129,9 @@
       "automerge": true,
       "groupName": "galaxy-collection non-major dependencies",
       "groupSlug": "galaxy-collection-non-major-deps",
+      "excludeDepNames": [
+        "homelab_ops.os"
+      ],
       "matchDatasources": [
         "galaxy-collection"
       ],
@@ -141,6 +144,9 @@
     {
       "groupName": "galaxy-collection major dependencies",
       "groupSlug": "galaxy-collection-deps",
+      "excludeDepNames": [
+        "homelab_ops.os"
+      ],
       "matchDatasources": [
         "galaxy-collection"
       ],
@@ -151,6 +157,16 @@
       "schedule": [
         "before 10am on Tuesday",
         "before 10am on Thursday"
+      ]
+    },
+    {
+      "groupName": "homelab_ops.os galaxy-collection",
+      "groupSlug": "galaxy-collection-homelab_ops-os",
+      "matchDatasources": [
+        "galaxy-collection"
+      ],
+      "matchDepNames": [
+        "homelab_ops.os"
       ]
     },
     {
