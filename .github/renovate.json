@@ -126,6 +126,91 @@
       "minimumReleaseAge": "30 days"
     },
     {
+      "automerge": true,
+      "groupName": "galaxy-collection non-major dependencies",
+      "groupSlug": "galaxy-collection-non-major-deps",
+      "matchDatasources": [
+        "galaxy-collection"
+      ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch"
+      ],
+      "minimumReleaseAge": "1 days"
+    },
+    {
+      "groupName": "galaxy-collection major dependencies",
+      "groupSlug": "galaxy-collection-deps",
+      "matchDatasources": [
+        "galaxy-collection"
+      ],
+      "matchUpdateTypes": [
+        "major"
+      ],
+      "minimumReleaseAge": "30 days",
+      "schedule": [
+        "before 10am on Tuesday",
+        "before 10am on Thursday"
+      ]
+    },
+    {
+      "automerge": true,
+      "description": "stability required dependencies: patch versions",
+      "matchDatasources": [
+        "github-releases",
+        "pypi"
+      ],
+      "matchPackageNames": [
+        "ansible-core",
+        "hashicorp/packer",
+        "mkaczanowski/packer-builder-arm"
+      ],
+      "matchUpdateTypes": [
+        "patch"
+      ],
+      "minimumReleaseAge": "7 days"
+    },
+    {
+      "description": "stability required dependencies: minor versions",
+      "matchDatasources": [
+        "github-releases",
+        "pypi"
+      ],
+      "matchPackageNames": [
+        "ansible-core",
+        "hashicorp/packer",
+        "mkaczanowski/packer-builder-arm"
+      ],
+      "matchUpdateTypes": [
+        "minor"
+      ],
+      "minimumReleaseAge": "90 days",
+      "schedule": [
+        "before 10am on Tuesday",
+        "before 10am on Thursday"
+      ]
+    },
+    {
+      "description": "stability required dependencies: major versions",
+      "matchDatasources": [
+        "github-releases",
+        "pypi"
+      ],
+      "matchPackageNames": [
+        "ansible-core",
+        "hashicorp/packer",
+        "mkaczanowski/packer-builder-arm"
+      ],
+      "matchUpdateTypes": [
+        "major"
+      ],
+      "minimumReleaseAge": "180 days",
+      "schedule": [
+        "before 10am on Tuesday",
+        "before 10am on Thursday"
+      ]
+    },
+    {
       "allowedVersions": "<24",
       "matchDatasources": [
         "pypi"

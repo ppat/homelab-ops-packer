@@ -1,0 +1,166 @@
+---
+# yamllint disable rule:line-length
+name: Build ubuntu image
+
+# yamllint disable-line rule:truthy
+on:
+  pull_request:
+    paths:
+    - 'ubuntu-arm64/**'
+    - 'scripts/**'
+    - '.github/workflows/build-ubuntu-image.yaml'
+  workflow_dispatch:
+    inputs:
+      publish_artifact:
+        description: 'Publish artifact to artifact store'
+        required: true
+        default: false
+        type: boolean
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  ARTIFACT_DIR: /home/runner/.build/dist
+  CACHE_DIR: /home/runner/.build/cache
+  CONFIG_DIR: /home/runner/.build/config
+  PACKER_CACHE_DIR: /home/runner/.build/cache/packer
+  PACKER_LOG: 1
+  # renovate: datasource=github-releases depName=hashicorp/packer
+  PACKER_VERSION: "1.10.3"
+  # renovate: datasource=github-releases depName=mkaczanowski/packer-builder-arm
+  PACKER_BUILDER_ARM_VERSION: "1.0.9"
+
+jobs:
+  build-ubuntu-image:
+    strategy:
+      matrix:
+        ubuntu_code_name: ["jammy"]
+        arch_plus_device_type: ["arm64+raspi"]
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+    - name: Derive architecture from matrix param - ${{ matrix.arch_plus_device_type }}
+      run: echo "ARCH=$(echo ${{ matrix.arch_plus_device_type }} | cut -d+ -f1)" >> $GITHUB_ENV
+
+    - name: Checkout test-ansible
+      uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4
+      with:
+        path: test-packer
+
+    - name: Checkout packer-builder-arm
+      if: ${{ env.ARCH == 'arm64' }}
+      uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4
+      with:
+        repository: mkaczanowski/packer-builder-arm
+        ref: "v${{ env.PACKER_BUILDER_ARM_VERSION }}"
+        path: packer-builder-arm
+
+    - name: Set up python
+      uses: actions/setup-python@82c7e631bb3cdc910f68e0081d67478d79c6982d # v5
+      with:
+        python-version: '3.11'
+
+    - name: Setup Go
+      if: ${{ env.ARCH == 'arm64' }}
+      uses: actions/setup-go@cdcb36043654635271a94b9a6d1392de5bb323a7 # v5
+      with:
+        # renovate: datasource=golang-version depName=golang
+        go-version: "1.21.4"
+        cache-dependency-path: |
+          packer-builder-arm/go.sum
+
+    - name: Install system packages
+      run: |
+        sudo apt-get update
+        sudo apt-get install -yq --no-install-recommends binfmt-support parted qemu-utils qemu-user-static sshpass
+
+    - name: Install packer
+      run: |
+        wget --progress=dot:giga -c https://releases.hashicorp.com/packer/${PACKER_VERSION}/packer_${PACKER_VERSION}_linux_amd64.zip -O /tmp/packer.zip
+        unzip /tmp/packer.zip
+        sudo install -o root -g root -m 0755 /tmp/packer /usr/local/sbin/packer
+      working-directory: /tmp
+
+    - name: Install packer-builder-arm plugin
+      if: ${{ env.ARCH == 'arm64' }}
+      run: |
+        go mod download
+        go build
+
+        mkdir -p $HOME/.config/packer/plugins
+        mv packer-builder-arm $HOME/.config/packer/plugins
+      working-directory: ./packer-builder-arm
+
+    - name: Install ansible
+      run: |
+        # install globally as we need to run packer build with sudo, so installing just for current user won't work
+        sudo pip install -r ./requirements.txt
+      working-directory: ./test-packer
+
+    - name: Prepare directories
+      run: |
+        mkdir -p $ARTIFACT_DIR $CACHE_DIR $CONFIG_DIR $PACKER_CACHE_DIR
+
+    - name: Fetch source image, detect partition configuration and prepare packer variables
+      run: |
+        ./prepare-source-image.sh --arch ${{ matrix.arch_plus_device_type }} --code-name ${{ matrix.ubuntu_code_name }} --download-dir $CACHE_DIR --config-dir $CONFIG_DIR
+      working-directory: ./test-packer/scripts/ubuntu
+
+    - name: Packer init
+      run: |
+        packer init .
+      working-directory: ./test-packer/ubuntu-${{ env.ARCH }}
+
+    - name: Packer build
+      run: |
+        sudo --preserve-env packer build -var-file=$CONFIG_DIR/source.pkrvars.hcl .
+      working-directory: ./test-packer/ubuntu-${{ env.ARCH }}
+
+    - name: Show artifacts
+      run: |
+        echo "------------------------------------ artifacts ------------------------------------"
+        ls -alh $(find $ARTIFACT_DIR/ -type f)
+        echo "-----------------------------------------------------------------------------------"
+        echo
+        echo "------------------------------------- manifest ------------------------------------"
+        cat $(find $ARTIFACT_DIR/ -type f -name '*.json' | sort | head -1)
+        echo
+        echo "-----------------------------------------------------------------------------------"
+
+    - name: Tailscale Connect
+      if: ${{ github.event_name == 'workflow_dispatch' && inputs.publish_artifact }}
+      uses: tailscale/github-action@4e4c49acaa9818630ce0bd7a564372c17e33fb4d # v2
+      with:
+        oauth-client-id: ${{ secrets.TAILSCALE_OAUTH_CLIENT_ID }}
+        oauth-secret: ${{ secrets.TAILSCALE_OAUTH_SECRET }}
+        tags: tag:github-action-ci-runner
+        # renovate: datasource=github-releases depName=tailscale/tailscale
+        version: "1.66.4"
+
+    - name: Tailscale Debug
+      if: ${{ github.event_name == 'workflow_dispatch' && inputs.publish_artifact }}
+      run: |
+        sudo -E tailscale netcheck --verbose 2>&1 | sed -f .output-filter
+        echo
+        sudo -E tailscale status 2>&1 | sed -f .output-filter
+        echo
+        sudo -E tailscale status --json --peers=false 2>&1 | sed -f .output-filter
+        echo
+      working-directory: ./test-packer
+
+    - name: Publish artifact
+      if: ${{ github.event_name == 'workflow_dispatch' && inputs.publish_artifact }}
+      run: |
+        MANIFEST_FILE="$(find $ARTIFACT_DIR/ -type f -name '*.json' | sort | head -1)"
+        ARTIFACT_ROOT_DIR="$(cat $MANIFEST_FILE | jq -r .builds[].custom_data.artifact_path | cut -d/ -f1)"
+        SRC="$ARTIFACT_DIR/$ARTIFACT_ROOT_DIR/"
+        DEST="${{ secrets.ARTIFACT_SERVER_PATH }}/$ARTIFACT_ROOT_DIR"
+
+        ./rsync-push.sh --username ${{ secrets.ARTIFACT_SERVER_USER }} --password ${{ secrets.ARTIFACT_SERVER_PASSWORD }} --host ${{ secrets.ARTIFACT_SERVER_HOST }} --source $SRC --dest $DEST
+      working-directory: ./test-packer/scripts/artifact
+
+    - name: Tailscale Disconnect
+      if: ${{ (success() || failure()) && github.event_name == 'workflow_dispatch' && inputs.publish_artifact }}
+      run: sudo -E tailscale logout

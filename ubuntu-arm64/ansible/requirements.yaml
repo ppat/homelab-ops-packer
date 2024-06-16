@@ -1,0 +1,4 @@
+---
+collections:
+- name: homelab_ops.os
+  version: 1.0.0
