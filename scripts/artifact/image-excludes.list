@@ -11,4 +11,6 @@
 ./var/tmp/*
 ./tmp/*
 *.bak
+*.log
+*.marker
 *~
