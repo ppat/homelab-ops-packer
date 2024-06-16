@@ -1,0 +1,14 @@
+./build
+./cache
+./dev/*
+./mnt/*
+./proc/*
+./run/*
+./srv/*
+./sys/*
+./var/cache/*
+./var/log/*
+./var/tmp/*
+./tmp/*
+*.bak
+*~
