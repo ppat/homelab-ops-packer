@@ -47,6 +47,7 @@ jobs:
 
     - name: Install packer
       run: |
+        [[ "$RUNNER_ARCH" == "ARM64" ]] && export PKG_ARCH=arm64 || export PKG_ARCH=amd64
         wget --progress=dot:giga -c https://releases.hashicorp.com/packer/${PACKER_VERSION}/packer_${PACKER_VERSION}_linux_${PKG_ARCH}.zip -O /tmp/packer.zip
         unzip /tmp/packer.zip
         sudo install -o root -g root -m 0755 /tmp/packer /usr/local/sbin/packer
