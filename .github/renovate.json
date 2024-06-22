@@ -236,16 +236,6 @@
         "molecule",
         "molecule-plugins"
       ]
-    },
-    {
-      "description": "slow down the update of packages with daily releases",
-      "matchDepNames": [
-        "renovate"
-      ],
-      "minimumReleaseAge": "7 days",
-      "schedule": [
-        "before 10am on Wednesday"
-      ]
     }
   ],
   "prConcurrentLimit": 20,

@@ -4,7 +4,6 @@
     "@commitlint/config-conventional": "19.2.2",
     "@commitlint/ensure": "19.0.3",
     "@commitlint/load": "19.2.0",
-    "commitlint-plugin-function-rules": "4.0.0",
-    "renovate": "37.406.2"
+    "commitlint-plugin-function-rules": "4.0.0"
   }
 }
