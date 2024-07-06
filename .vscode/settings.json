@@ -1,0 +1,24 @@
+{
+  "editor.detectIndentation": true,
+  "editor.indentSize": 2,
+  "editor.insertSpaces": true,
+  "explorer.excludeGitIgnore": true,
+  "search.exclude": {
+    "**/package-lock.json": true
+  },
+  "search.useIgnoreFiles": true,
+
+
+  "[javascript]": {
+    "editor.detectIndentation": false,
+    "editor.indentSize": 2
+  },
+  "[json]": {
+    "editor.detectIndentation": false,
+    "editor.indentSize": 2
+  },
+  "[shellscript]": {
+    "editor.detectIndentation": false,
+    "editor.indentSize": 2
+  }
+}
