@@ -36,7 +36,7 @@ jobs:
   build-ubuntu-image:
     strategy:
       matrix:
-        ubuntu_code_name: ["jammy"]
+        ubuntu_code_name: ["jammy", "noble"]
         arch_plus_device_type: ["arm64+raspi"]
     runs-on: ubuntu-latest
     timeout-minutes: 60
