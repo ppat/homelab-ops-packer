@@ -7,7 +7,7 @@
         "(^|/).+\\.ya?ml$"
       ],
       "matchStrings": [
-        "# renovate: datasource=(?<datasource>[a-z-.]+?)\\s+depName=(?<depName>[a-zA-Z0-9-\/]+?)(\\s+repository=(?<registryUrl>[^\\s]+?))?(\\s+versioning=(?<versioning>[^\\s]+?))?\\s*\\n.+[\\:\\=]\\s?\"v?(?<currentValue>[^\\s]+)\""
+        "# renovate: datasource=(?<datasource>[a-z-.]+?)\\s+depName=(?<depName>[a-zA-Z0-9-/]+?)(\\s+repository=(?<registryUrl>[^\\s]+?))?(\\s+versioning=(?<versioning>[^\\s]+?))?\\s*\\n.+[\\:\\=]\\s?\"v?(?<currentValue>[^\\s]+)\""
       ],
       "versioningTemplate": "{{#if versioning}}{{{versioning}}}{{else}}semver{{/if}}"
     }
@@ -129,9 +129,6 @@
       "automerge": true,
       "groupName": "galaxy-collection non-major dependencies",
       "groupSlug": "galaxy-collection-non-major-deps",
-      "excludeDepNames": [
-        "homelab_ops.os"
-      ],
       "matchDatasources": [
         "galaxy-collection"
       ],
@@ -139,14 +136,14 @@
         "minor",
         "patch"
       ],
-      "minimumReleaseAge": "1 days"
+      "minimumReleaseAge": "1 days",
+      "matchDepNames": [
+        "!homelab_ops.os"
+      ]
     },
     {
       "groupName": "galaxy-collection major dependencies",
       "groupSlug": "galaxy-collection-deps",
-      "excludeDepNames": [
-        "homelab_ops.os"
-      ],
       "matchDatasources": [
         "galaxy-collection"
       ],
@@ -157,6 +154,9 @@
       "schedule": [
         "before 10am on Tuesday",
         "before 10am on Thursday"
+      ],
+      "matchDepNames": [
+        "!homelab_ops.os"
       ]
     },
     {
