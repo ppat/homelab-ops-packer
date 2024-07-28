@@ -16,6 +16,8 @@
           parameters:
             net.ipv4.ip_forward: 1
             net.ipv6.conf.all.forwarding: 1
+            fs.inotify.max_user_watches: 1048576
+            fs.inotify.max_user_instances: 1048576
           upgrade: true
         packages:
           install:
@@ -37,7 +39,6 @@
           - netcat-openbsd
           - net-tools
           - nfs-common
-          - nmap
           - open-iscsi
           - parted
           - pv
