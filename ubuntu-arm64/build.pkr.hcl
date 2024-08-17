@@ -15,6 +15,7 @@ build {
       "echo \"nameserver $DNS_SERVER\" > /etc/resolv.conf",
       "echo '**************************************************************************************'",
       "echo '===> Re-locating boot firmware...'",
+      "mkdir -p /boot/firmware",
       "cp -R ${local.boot_firmware_source_path}/* /boot/firmware/",
       "echo '**************************************************************************************'"
     ]
