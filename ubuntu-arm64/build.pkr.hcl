@@ -53,7 +53,7 @@ build {
     inline = [
       "echo '**************************************************************************************'",
       "echo '===> Cleaning up...'",
-      "sudo ${path.root}/scripts/chroot-invoke.sh ${var.target_architecture} ${path.root}/scripts/cleanup.sh",
+      "sudo ${path.root}/scripts/chroot-invoke.sh ${var.target_architecture} cleanup.sh",
       "echo '**************************************************************************************'",
     ]
   }

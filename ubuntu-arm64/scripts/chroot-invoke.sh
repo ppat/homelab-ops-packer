@@ -6,7 +6,7 @@ TARGET_SCRIPT="$2"
 CURRENT_ARCH="$(dpkg --print-architecture)"
 
 mkdir -p $CHROOT_PATH/tmp/scripts
-cp $TARGET_SCRIPT $CHROOT_PATH/tmp/scripts/
+cp ./scripts/$TARGET_SCRIPT $CHROOT_PATH/tmp/scripts/
 
 if [[ "$CURRENT_ARCH" == "$TARGET_ARCH" ]]; then
   echo "Current architecture ($CURRENT_ARCH) matches target architecture ($TARGET_ARCH), no emulation needed."
