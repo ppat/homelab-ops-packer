@@ -9,8 +9,8 @@ build {
     env = {
       ROOT_MOUNT_PATH = local.chroot_path
       BOOT_MOUNT_PATH = (var.target_architecture == "arm64") ? "/boot/firmware" : "-"
-      OUTPUT_DIR       = var.image_dir
-      DNS_SERVER       = var.dns_server
+      OUTPUT_DIR      = var.image_dir
+      DNS_SERVER      = var.dns_server
     }
     inline = [
       "mkdir -p $OUTPUT_DIR",
