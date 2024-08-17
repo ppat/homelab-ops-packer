@@ -32,7 +32,7 @@ build {
 
   # ----------------------------------- provision ---------------------------------------
   provisioner "ansible" {
-    command       = "${local.packer_root}/scripts/ansible-playbook.${var.target_architecture}.sh"
+    command       = "./scripts/ansible-playbook.${var.target_architecture}.sh"
     playbook_file = "${local.packer_root}/ansible/playbook.yaml"
     galaxy_file   = "${local.packer_root}/ansible/requirements.yaml"
 

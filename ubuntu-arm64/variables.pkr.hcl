@@ -41,7 +41,6 @@ variable "dns_server" {
 
 variable "target_architecture" {
   type    = string
-  default = "arm64"
 }
 
 variable "target_device" {
