@@ -48,7 +48,7 @@
           raspi: []
           any: []
     # yamllint disable rule:line-length
-    required_packages: "{{ system_packages.baseline + system_packages.by_release[ansible_distribution_release]['raspi'] }}"
+    required_packages: "{{ system_packages.baseline + system_packages.by_release[ansible_distribution_release][device_type] }}"
 
   tasks:
   - name: "Setup Ubuntu OS"
