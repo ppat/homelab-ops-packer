@@ -16,7 +16,7 @@ apt-get clean -y
 echo '======> Cleaning apt lists...'
 find /var/lib/apt/lists/* -type f -delete
 echo '====> Removing kernel backups...'
-find /boot/firmware/* -name '*.bak' -print -delete
+find /boot/firmware/* -name '*.bak' -print -delete || echo "/boot/firmware does not exist, skipping..."
 echo '====> Cleaning temp python artifacts (from having run ansible)...'
 find /usr -type f -iname '*.pyc' -delete || echo 'could not delete all pyc files...'
 # shellcheck disable=SC2038
