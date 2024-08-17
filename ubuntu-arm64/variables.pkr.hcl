@@ -1,7 +1,7 @@
-// variable "ansible_params" {
-//   type    = map(string)
-//   default = {}
-// }
+variable "ansible_params" {
+  type    = map(string)
+  default = {}
+}
 
 // variable "artifact_dir" {
 //   type    = string
@@ -59,6 +59,6 @@ variable "ubuntu_release" {
 }
 
 variable "image_dir" {
-  type = string
+  type    = string
   default = "${env("HOME")}/.cache/images"
 }

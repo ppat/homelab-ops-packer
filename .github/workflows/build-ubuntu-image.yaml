@@ -36,7 +36,7 @@ jobs:
   build-ubuntu-image:
     strategy:
       matrix:
-        ubuntu_code_name: ["jammy", "noble"]
+        ubuntu_release: ["jammy", "noble"]
         arch_plus_device_type: ["arm64+raspi"]
         # arch_plus_device_type: ["arm64+raspi", "amd64"]
     runs-on: ubuntu-latest
@@ -106,7 +106,7 @@ jobs:
 
     # - name: Fetch source image, detect partition configuration and prepare packer variables
     #   run: |
-    #     ./prepare-source-image.sh --arch ${{ matrix.arch_plus_device_type }} --code-name ${{ matrix.ubuntu_code_name }} --download-dir $CACHE_DIR --config-dir $CONFIG_DIR
+    #     ./prepare-source-image.sh --arch ${{ matrix.arch_plus_device_type }} --code-name ${{ matrix.ubuntu_release }} --download-dir $CACHE_DIR --config-dir $CONFIG_DIR
     #   working-directory: ./test-packer/scripts/ubuntu
 
     - name: Packer init
@@ -115,9 +115,22 @@ jobs:
       working-directory: ./test-packer/ubuntu-${{ env.ARCH }}
 
     - name: Packer build
+      env:
+        UBUNTU_RELEASE: ${{ matrix.ubuntu_release }}
       run: |
-        sudo --preserve-env packer build -only=null.chroot -var ubuntu_release=noble .
-        # sudo --preserve-env packer build -var-file=$CONFIG_DIR/source.pkrvars.hcl .
+        local arch="$(echo $arch_plus_device_type | cut -d+ -f1)"
+        local device_type="$(echo $arch_plus_device_type | cut -d+ -f2)"
+
+        if [[ "$arch" == "$device_type" ]]; then
+          device_type="any"
+        fi     
+        {
+          echo "ubuntu_release = \"${UBUNTU_RELEASE}\""
+          echo "target_architecture = \"${arch}\""
+          echo "target_device = \"${device_type}\""
+        } >> $CONFIG_DIR/source.pkrvars.hcl
+
+        sudo --preserve-env packer build -only=null.chroot -var-file=$CONFIG_DIR/source.pkrvars.hcl .
       working-directory: ./test-packer/ubuntu-${{ env.ARCH }}
 
     - name: Show artifacts

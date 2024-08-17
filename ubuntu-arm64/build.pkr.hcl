@@ -7,8 +7,9 @@ build {
   # ------------------------------------ prepare ----------------------------------------
   provisioner "shell-local" {
     env = {
-      IMAGE_MOUNT_PATH = "/tmp/${local.build_basename}"
-      OUTPUT_DIR = var.image_dir
+      IMAGE_MOUNT_PATH = local.chroot_path
+      OUTPUT_DIR       = var.image_dir
+      DNS_SERVER       = var.dns_server
     }
     only = [
       "null.chroot"
@@ -16,46 +17,37 @@ build {
     inline = [
       "mkdir -p $OUTPUT_DIR",
       "mkdir -p $IMAGE_MOUNT_PATH",
+      "echo '**************************************************************************************'",
+      "echo '===> Fetching image...'",
       "sudo ${path.root}/scripts/fetch-image.sh --url ${local.image_url} --output-dir $OUTPUT_DIR --timeout 2m --retries 10",
-      "sudo ${path.root}/scripts/mount-image.sh --image /tmp/fetched_image --root-mountpoint $IMAGE_MOUNT_PATH --boot-mountpoint /boot/firmware"
+      "echo '**************************************************************************************'",
+      "echo '===> Mounting image...'",
+      "sudo ${path.root}/scripts/mount-image.sh --image /tmp/fetched_image --root-mountpoint $IMAGE_MOUNT_PATH --boot-mountpoint /boot/firmware",
+      "echo '**************************************************************************************'",
+      "echo '===> Enabling DNS resolution...'",
+      "rm -f $IMAGE_MOUNT_PATH/etc/resolv.conf",
+      "echo \"nameserver $DNS_SERVER\" > $IMAGE_MOUNT_PATH/etc/resolv.conf",
+      "echo '**************************************************************************************'",
     ]
-    // script = "${path.root}/scripts/setup-chroot.sh"
   }
-
-  // provisioner "shell" {
-  //   environment_vars = [
-  //     "DNS_SERVER=${var.dns_server}",
-  //   ]
-  //   inline = [
-  //     "echo '**************************************************************************************'",
-  //     "echo '===> Enabling DNS resolution...'",
-  //     "rm -f /etc/resolv.conf",
-  //     "echo \"nameserver $DNS_SERVER\" > /etc/resolv.conf",
-  //     "echo '**************************************************************************************'",
-  //     "echo '===> Re-locating boot firmware...'",
-  //     "mkdir -p /boot/firmware",
-  //     "cp -R ${local.boot_firmware_source_path}/* /boot/firmware/",
-  //     "echo '**************************************************************************************'"
-  //   ]
-  // }
   # -------------------------------------------------------------------------------------
 
 
   # ----------------------------------- provision ---------------------------------------
-  // provisioner "ansible" {
-  //   playbook_file = "${local.packer_root}/ansible/playbook.yaml"
-  //   galaxy_file   = "${local.packer_root}/ansible/requirements.yaml"
+  provisioner "ansible" {
+    playbook_file = "${local.packer_root}/ansible/playbook.yaml"
+    galaxy_file   = "${local.packer_root}/ansible/requirements.yaml"
 
-  //   # see: https://github.com/mkaczanowski/packer-builder-arm/issues/121
-  //   inventory_file_template = "default ansible_host=${local.chroot_path} ansible_connection=chroot\n"
-  //   extra_arguments = concat(
-  //     [for k, v in var.ansible_params : "-e ${k}=${v}"],
-  //     [
-  //       "-e device_type=${var.target_device}",
-  //       "--verbose"
-  //     ]
-  //   )
-  // }
+    # see: https://github.com/mkaczanowski/packer-builder-arm/issues/121
+    inventory_file_template = "default ansible_host=${local.chroot_path} ansible_connection=chroot\n"
+    extra_arguments = concat(
+      [for k, v in var.ansible_params : "-e ${k}=${v}"],
+      [
+        "-e device_type=${var.target_device}",
+        "--verbose"
+      ]
+    )
+  }
 
   // provisioner "shell" {
   //   script = "${local.packer_root}/../scripts/ubuntu/cleanup.sh"

@@ -1,6 +1,6 @@
 locals {
   arch_plus_device_suffix = (var.target_device != "any") ? join("+", [var.target_architecture, var.target_device]) : var.target_architecture
-  image_url = "https://cdimage.ubuntu.com/ubuntu-server/${var.ubuntu_release}/daily-preinstalled/current/${var.ubuntu_release}-preinstalled-server-${local.arch_plus_device_suffix}.img.xz"
+  image_url               = "https://cdimage.ubuntu.com/ubuntu-server/${var.ubuntu_release}/daily-preinstalled/current/${var.ubuntu_release}-preinstalled-server-${local.arch_plus_device_suffix}.img.xz"
 
   build_timestamp     = formatdate("YYYYMMDDhhmm", timestamp())
   build_basename      = "${var.ubuntu_release}${var.target_device == "any" ? "" : format("-%s", var.target_device)}-${local.build_timestamp}"
@@ -11,7 +11,7 @@ locals {
 
   artifact_output_path      = "/tmp"
   boot_firmware_source_path = "/mnt/boot-firmware"
-  chroot_path               = "/tmp/packer_chroot"
+  chroot_path               = "/tmp/${local.build_basename}"
   packer_root               = "${path.root}"
 
   // artifact_output_path      = "${var.artifact_dir}/${local.build_artifact_path}"
