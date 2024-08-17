@@ -7,7 +7,8 @@ build {
   # ------------------------------------ prepare ----------------------------------------
   provisioner "shell-local" {
     env = {
-      IMAGE_MOUNT_PATH = local.chroot_path
+      ROOT_MOUNT_PATH = local.chroot_path
+      BOOT_MOUNT_PATH = (var.target_architecture == "arm64") ? "/boot/firmware" : "-"
       OUTPUT_DIR       = var.image_dir
       DNS_SERVER       = var.dns_server
     }
@@ -19,11 +20,11 @@ build {
       "sudo ${path.root}/scripts/fetch-image.sh --url ${local.image_url} --output-dir $OUTPUT_DIR --timeout 2m --retries 10",
       "echo '**************************************************************************************'",
       "echo '===> Mounting image...'",
-      "sudo ${path.root}/scripts/mount-image.sh --image /tmp/fetched_image --root-mountpoint $IMAGE_MOUNT_PATH --boot-mountpoint /boot/firmware",
+      "sudo ${path.root}/scripts/mount-image.sh --image /tmp/fetched_image --root-mountpoint $ROOT_MOUNT_PATH --boot-mountpoint $BOOT_MOUNT_PATH",
       "echo '**************************************************************************************'",
       "echo '===> Enabling DNS resolution (for apt-get)...'",
-      "rm -f $IMAGE_MOUNT_PATH/etc/resolv.conf",
-      "echo \"nameserver $DNS_SERVER\" > $IMAGE_MOUNT_PATH/etc/resolv.conf",
+      "rm -f $ROOT_MOUNT_PATH/etc/resolv.conf",
+      "echo \"nameserver $DNS_SERVER\" > $ROOT_MOUNT_PATH/etc/resolv.conf",
       "echo '**************************************************************************************'",
     ]
   }
