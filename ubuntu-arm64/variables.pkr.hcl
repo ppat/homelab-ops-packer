@@ -40,7 +40,7 @@ variable "dns_server" {
 // }
 
 variable "target_architecture" {
-  type    = string
+  type = string
 }
 
 variable "target_device" {
