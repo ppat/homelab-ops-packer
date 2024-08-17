@@ -1,5 +1,5 @@
 #!/bin/bash
-set -eo pipefail
+set -exo pipefail
 
 # read the name of the called script (which would be a symlink to this script)
 CALLED_SYMLINK="$(basename "$0")"
