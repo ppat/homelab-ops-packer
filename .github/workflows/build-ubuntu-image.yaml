@@ -117,9 +117,10 @@ jobs:
     - name: Packer build
       env:
         UBUNTU_RELEASE: ${{ matrix.ubuntu_release }}
+        ARCH_PLUS_DEVICE: ${{ matrix.arch_plus_device_type }}
       run: |
-        local arch="$(echo $arch_plus_device_type | cut -d+ -f1)"
-        local device_type="$(echo $arch_plus_device_type | cut -d+ -f2)"
+        local arch="$(echo $ARCH_PLUS_DEVICE | cut -d+ -f1)"
+        local device_type="$(echo $ARCH_PLUS_DEVICE | cut -d+ -f2)"
 
         if [[ "$arch" == "$device_type" ]]; then
           device_type="any"
