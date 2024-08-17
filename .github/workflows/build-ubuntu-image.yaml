@@ -126,7 +126,8 @@ jobs:
 
     - name: run wrapper
       run: |
-        ./scripts/ansible-playbook.${ARCH}.sh --version
+        # ./scripts/ansible-playbook.${ARCH}.sh --version
+        /usr/bin/qemu-aarch64-static ansible-playbook --version
       working-directory: ./test-packer/ubuntu-arm64
 
     - name: Packer build
