@@ -14,7 +14,7 @@ build {
     }
     inline = [
       "mkdir -p $OUTPUT_DIR",
-      "mkdir -p $IMAGE_MOUNT_PATH",
+      "mkdir -p $ROOT_MOUNT_PATH",
       "echo '**************************************************************************************'",
       "echo '===> Fetching image...'",
       "sudo ${path.root}/scripts/fetch-image.sh --url ${local.image_url} --output-dir $OUTPUT_DIR --timeout 2m --retries 10",
