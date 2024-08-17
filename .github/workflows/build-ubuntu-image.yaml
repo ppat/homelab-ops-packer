@@ -37,7 +37,7 @@ jobs:
     strategy:
       matrix:
         ubuntu_code_name: ["jammy", "noble"]
-        arch_plus_device_type: ["arm64+raspi"]
+        arch_plus_device_type: ["arm64+raspi", "amd64"]
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
@@ -49,27 +49,27 @@ jobs:
       with:
         path: test-packer
 
-    - name: Checkout packer-builder-arm
-      if: ${{ env.ARCH == 'arm64' }}
-      uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
-      with:
-        repository: mkaczanowski/packer-builder-arm
-        ref: "v${{ env.PACKER_BUILDER_ARM_VERSION }}"
-        path: packer-builder-arm
+    # - name: Checkout packer-builder-arm
+    #   if: ${{ env.ARCH == 'arm64' }}
+    #   uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
+    #   with:
+    #     repository: mkaczanowski/packer-builder-arm
+    #     ref: "v${{ env.PACKER_BUILDER_ARM_VERSION }}"
+    #     path: packer-builder-arm
 
     - name: Set up python
       uses: actions/setup-python@39cd14951b08e74b54015e9e001cdefcf80e669f # v5
       with:
         python-version: '3.11'
 
-    - name: Setup Go
-      if: ${{ env.ARCH == 'arm64' }}
-      uses: actions/setup-go@0a12ed9d6a96ab950c8f026ed9f722fe0da7ef32 # v5
-      with:
-        # renovate: datasource=golang-version depName=golang
-        go-version: "1.22.6"
-        cache-dependency-path: |
-          packer-builder-arm/go.sum
+    # - name: Setup Go
+    #   if: ${{ env.ARCH == 'arm64' }}
+    #   uses: actions/setup-go@0a12ed9d6a96ab950c8f026ed9f722fe0da7ef32 # v5
+    #   with:
+    #     # renovate: datasource=golang-version depName=golang
+    #     go-version: "1.22.6"
+    #     cache-dependency-path: |
+    #       packer-builder-arm/go.sum
 
     - name: Install system packages
       run: |
@@ -83,15 +83,15 @@ jobs:
         sudo install -o root -g root -m 0755 /tmp/packer /usr/local/sbin/packer
       working-directory: /tmp
 
-    - name: Install packer-builder-arm plugin
-      if: ${{ env.ARCH == 'arm64' }}
-      run: |
-        go mod download
-        go build
+    # - name: Install packer-builder-arm plugin
+    #   if: ${{ env.ARCH == 'arm64' }}
+    #   run: |
+    #     go mod download
+    #     go build
 
-        mkdir -p $HOME/.config/packer/plugins
-        mv packer-builder-arm $HOME/.config/packer/plugins
-      working-directory: ./packer-builder-arm
+    #     mkdir -p $HOME/.config/packer/plugins
+    #     mv packer-builder-arm $HOME/.config/packer/plugins
+    #   working-directory: ./packer-builder-arm
 
     - name: Install ansible
       run: |
@@ -103,10 +103,10 @@ jobs:
       run: |
         mkdir -p $ARTIFACT_DIR $CACHE_DIR $CONFIG_DIR $PACKER_CACHE_DIR
 
-    - name: Fetch source image, detect partition configuration and prepare packer variables
-      run: |
-        ./prepare-source-image.sh --arch ${{ matrix.arch_plus_device_type }} --code-name ${{ matrix.ubuntu_code_name }} --download-dir $CACHE_DIR --config-dir $CONFIG_DIR
-      working-directory: ./test-packer/scripts/ubuntu
+    # - name: Fetch source image, detect partition configuration and prepare packer variables
+    #   run: |
+    #     ./prepare-source-image.sh --arch ${{ matrix.arch_plus_device_type }} --code-name ${{ matrix.ubuntu_code_name }} --download-dir $CACHE_DIR --config-dir $CONFIG_DIR
+    #   working-directory: ./test-packer/scripts/ubuntu
 
     - name: Packer init
       run: |
@@ -115,7 +115,8 @@ jobs:
 
     - name: Packer build
       run: |
-        sudo --preserve-env packer build -var-file=$CONFIG_DIR/source.pkrvars.hcl .
+        sudo --preserve-env packer build -only=null.chroot -var ubuntu_release=noble .
+        # sudo --preserve-env packer build -var-file=$CONFIG_DIR/source.pkrvars.hcl .
       working-directory: ./test-packer/ubuntu-${{ env.ARCH }}
 
     - name: Show artifacts
