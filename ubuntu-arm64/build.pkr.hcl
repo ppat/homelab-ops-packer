@@ -31,7 +31,8 @@ build {
       [
         "-e boot_firmware_source=${local.boot_firmware_source_path}",
         "-e device_type=${var.target_device}",
-        "--verbose"
+        // "--verbose"
+        "-vvv"
       ]
     )
   }
