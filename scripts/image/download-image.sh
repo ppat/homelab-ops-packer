@@ -2,6 +2,50 @@
 set -euo pipefail
 
 
+
+url_resolved_to_random_ip() {
+  local url=$1
+  local hostname="$(echo $url | sed -E -n 's|([a-z0-9]*\:\/\/)([^\\/]+)\/.*|\2|p')"
+  local random_ip="$(dig +short $hostname | sort --random-sort | head -1)"
+  echo $url | sed -E -n 's|([a-z0-9]*\:\/\/)([^\\/]+)(\/.*)|\1'$random_ip'\3|p'
+}
+
+fetch_url() {
+  local url=$1
+  local output_file=$2
+  local timeout=$3
+  local retries=$4
+
+  rm -f ${output_file}
+
+  local attempt=0
+  while [ $attempt -lt $retries ]; do
+    echo "Attempt $attempt"
+    local attempt_url="$(url_resolved_to_random_ip $url)"
+    echo "    URL: $attempt_url"
+    set +e
+    /usr/bin/timeout --verbose $timeout wget \
+      -nv \
+      --connect-timeout=10 \
+      --continue \
+      --no-check-certificate \
+      --output-document=${output_file} \
+      $attempt_url
+    exit_code=$?
+    set -e
+    if [[ $exit_code -eq 0 ]]; then
+      echo "  Success"
+      return 0
+    elif [[ $exit_code -eq 124 ]]; then
+      echo "  Timed out"
+      attempt=$(( attempt + 1 ))
+    else
+      echo "  Failed"
+      exit $exit_code
+    fi
+  done
+}
+
 _download_from_upstream() {
   local release_url=$1
   local checksum_url=$2
@@ -9,9 +53,9 @@ _download_from_upstream() {
   local download_dir=$4
 
   echo "Downloading ${download_file}..."
-  wget -nv --continue -O "${download_dir}/${download_file}" ${release_url}
+  fetch_url ${release_url} "${download_dir}/${download_file}" 2m 10
   echo "Downloading checksums..."
-  wget -O "${download_dir}/${download_file}_SHA256SUMS" ${checksum_url}
+  fetch_url ${checksum_url} "${download_dir}/${download_file}_SHA256SUMS" 30s 10
   echo "Verifying checksum..."
   sha256sum --ignore-missing --check "${download_file}_SHA256SUMS"
 }
