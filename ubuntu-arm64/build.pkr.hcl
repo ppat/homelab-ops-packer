@@ -24,7 +24,7 @@ build {
       "echo '===> Mounting image...'",
       "sudo ${path.root}/scripts/mount-image.sh --image /tmp/fetched_image --root-mountpoint $IMAGE_MOUNT_PATH --boot-mountpoint /boot/firmware",
       "echo '**************************************************************************************'",
-      "echo '===> Enabling DNS resolution...'",
+      "echo '===> Enabling DNS resolution (for apt-get)...'",
       "rm -f $IMAGE_MOUNT_PATH/etc/resolv.conf",
       "echo \"nameserver $DNS_SERVER\" > $IMAGE_MOUNT_PATH/etc/resolv.conf",
       "echo '**************************************************************************************'",
@@ -35,6 +35,7 @@ build {
 
   # ----------------------------------- provision ---------------------------------------
   provisioner "ansible" {
+    command       = "${local.packer_root}/scripts/${var.target_architecture}.ansible-playbook.sh"
     playbook_file = "${local.packer_root}/ansible/playbook.yaml"
     galaxy_file   = "${local.packer_root}/ansible/requirements.yaml"
 
@@ -49,9 +50,17 @@ build {
     )
   }
 
-  // provisioner "shell" {
-  //   script = "${local.packer_root}/../scripts/ubuntu/cleanup.sh"
-  // }
+  provisioner "shell-local" {
+    env = {
+      CHROOT_PATH = local.chroot_path
+    }
+    inline = [
+      "echo '**************************************************************************************'",
+      "echo '===> Cleaning up...'",
+      "sudo ${path.root}/scripts/chroot-invoke.sh ${path.root}/scripts/cleanup.sh",
+      "echo '**************************************************************************************'",
+    ]
+  }
   # -------------------------------------------------------------------------------------
 
 
