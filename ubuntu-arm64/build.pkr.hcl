@@ -14,6 +14,9 @@ build {
       "rm -f /etc/resolv.conf",
       "echo \"nameserver $DNS_SERVER\" > /etc/resolv.conf",
       "echo '**************************************************************************************'",
+      "echo '===> Re-locating boot firmware...'",
+      "cp -R ${local.boot_firmware_source_path}/* /boot/firmware/",
+      "echo '**************************************************************************************'"
     ]
   }
   # -------------------------------------------------------------------------------------
@@ -29,10 +32,8 @@ build {
     extra_arguments = concat(
       [for k, v in var.ansible_params : "-e ${k}=${v}"],
       [
-        "-e boot_firmware_source=${local.boot_firmware_source_path}",
         "-e device_type=${var.target_device}",
-        // "--verbose"
-        "-vvv"
+        "--verbose"
       ]
     )
   }
