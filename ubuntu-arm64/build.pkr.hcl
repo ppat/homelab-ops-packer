@@ -11,9 +11,6 @@ build {
       OUTPUT_DIR       = var.image_dir
       DNS_SERVER       = var.dns_server
     }
-    only = [
-      "null.chroot"
-    ]
     inline = [
       "mkdir -p $OUTPUT_DIR",
       "mkdir -p $IMAGE_MOUNT_PATH",
