@@ -1,8 +1,9 @@
 #!/bin/bash
-set -eo pipefail
+set -euo pipefail
 
-TARGET_ARCH="$1"
-TARGET_SCRIPT="$2"
+CHROOT_PATH="$1"
+TARGET_ARCH="$2"
+TARGET_SCRIPT="$3"
 CURRENT_ARCH="$(dpkg --print-architecture)"
 
 mkdir -p $CHROOT_PATH/tmp/scripts

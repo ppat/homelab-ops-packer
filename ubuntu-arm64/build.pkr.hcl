@@ -47,13 +47,10 @@ build {
   }
 
   provisioner "shell-local" {
-    env = {
-      CHROOT_PATH = local.chroot_path
-    }
     inline = [
       "echo '**************************************************************************************'",
       "echo '===> Cleaning up...'",
-      "sudo ${path.root}/scripts/chroot-invoke.sh ${var.target_architecture} cleanup.sh",
+      "sudo ${path.root}/scripts/chroot-invoke.sh ${local.chroot_path} ${var.target_architecture} cleanup.sh",
       "echo '**************************************************************************************'",
     ]
   }
