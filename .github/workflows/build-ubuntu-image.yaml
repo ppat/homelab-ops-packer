@@ -124,11 +124,6 @@ jobs:
         packer init .
       working-directory: ./test-packer/ubuntu-arm64
 
-    - name: run wrapper
-      run: |
-        /usr/bin/qemu-aarch64-static ansible-playbook --version
-      working-directory: ./test-packer/ubuntu-arm64
-
     - name: Packer build
       run: |
         sudo --preserve-env packer build -var-file=$CONFIG_DIR/source.pkrvars.hcl .
