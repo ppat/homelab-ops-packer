@@ -2,12 +2,62 @@
 - name: Configure base image
   hosts: all
   gather_facts: true
+  vars:
+    # These should be a bare-minimum set of packages needed for:
+    #  - booting
+    #  - networking
+    #  - filesystem
+    #  - initial provisioning upon boot
+    #  - troubleshooting of actions within the above stages of lifecycle
+    system_packages:
+      baseline:
+      - apt-transport-https
+      - bsdextrautils
+      - btrfs-progs
+      - ca-certificates
+      - curl
+      - dnsutils
+      - dosfstools
+      - e2fsprogs
+      - fdisk
+      - gnupg
+      - jq
+      - less
+      - lsb-release
+      - lsof
+      - lz4
+      - netcat-openbsd
+      - net-tools
+      - nfs-common
+      - openssl
+      - open-iscsi
+      - parted
+      - pv
+      - vim
+      - wget
+      - wireguard
+      - zstd
+      by_release:
+        focal:
+          raspi: []
+          any: []
+        jammy:
+          raspi: ['linux-modules-extra-raspi']
+          any: []
+        noble:
+          raspi: []
+          any: []
+    # yamllint disable rule:line-length
+    required_packages: "{{ system_packages.baseline + system_packages.by_release[ansible_distribution_release]['raspi'] }}"
+
   tasks:
   - name: "Setup Ubuntu OS"
     ansible.builtin.include_role:
       name: homelab_ops.os.ubuntu
     vars:
       ubuntu:
+        initrd:
+          iscsi_root_fs_enabled: true
         kernel:
           modules:
           - br_netfilter
@@ -20,31 +70,7 @@
             fs.inotify.max_user_instances: 1048576
           upgrade: true
         packages:
-          install:
-          # These should be a bare-minimum set of packages needed for:
-          #  - booting
-          #  - networking
-          #  - filesystem
-          #  - initial provisioning upon boot
-          #  - troubleshooting of actions within the above stages of lifecycle
-          - btrfs-progs
-          - dnsutils
-          - fdisk
-          - gnupg
-          - jq
-          - less
-          - lsb-release
-          - lsof
-          - lz4
-          - netcat-openbsd
-          - net-tools
-          - nfs-common
-          - open-iscsi
-          - parted
-          - pv
-          - vim
-          - wireguard
-          - zstd
+          install: "{{ required_packages }}"
           remove:
           - name: modemmanager
             systemd_services: [ModemManager]
