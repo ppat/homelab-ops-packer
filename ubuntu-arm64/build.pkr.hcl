@@ -48,15 +48,13 @@ build {
   }
 
   provisioner "shell-local" {
-    env = {
-      CHROOT_PATH   = local.chroot_path
-      TARGET_ARCH   = var.target_architecture
-      FILES         = "${path.root}/scripts/cleanup.sh"
-      TARGET_SCRIPT = "cleanup.sh"
-    }
     inline = [
       "echo '**************************************************************************************'",
       "echo '===> Cleaning up...'",
+      "export CHROOT_PATH=${local.chroot_path}",
+      "export TARGET_ARCH=${var.target_architecture}",
+      "export FILES=\"${path.root}/scripts/cleanup.sh\"",
+      "export TARGET_SCRIPT=cleanup.sh",
       "sudo ${path.root}/scripts/chroot-invoke.sh",
       "echo '**************************************************************************************'",
     ]
