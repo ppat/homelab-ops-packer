@@ -93,12 +93,12 @@ jobs:
     - name: Packer init
       run: |
         packer init .
-      working-directory: ./homelab-ops-packer/ubuntu
+      working-directory: ./ubuntu
 
     - name: Packer build
       run: |
         sudo --preserve-env packer build -var-file=$CONFIG_DIR/source.pkrvars.hcl .
-      working-directory: ./homelab-ops-packer/ubuntu
+      working-directory: ./ubuntu
 
     - name: Show artifacts
       run: |
