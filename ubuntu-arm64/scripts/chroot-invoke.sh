@@ -18,12 +18,12 @@ else
   echo "Current architecture ($CURRENT_ARCH) does NOT match target architecture ($TARGET_ARCH), emulation is needed."
   if [[ "$TARGET_ARCH" == "arm64" ]]; then
     set -x
-    cp /usr/bin/qemu-aarch64-static /tmp/scripts/qemu-aarch64-static
+    cp /usr/bin/qemu-aarch64-static $CHROOT_PATH/tmp/scripts/qemu-aarch64-static
     chroot $CHROOT_PATH /tmp/scripts/qemu-aarch64-static /tmp/scripts/$TARGET_SCRIPT
     set +x
   else
     set -x
-    cp /usr/bin/qemu-x86_64-static /tmp/scripts/qemu-x86_64-static
+    cp /usr/bin/qemu-x86_64-static $CHROOT_PATH/tmp/scripts/qemu-x86_64-static
     chroot $CHROOT_PATH /tmp/scripts/qemu-x86_64-static /tmp/scripts/$TARGET_SCRIPT
     set +x
   fi
