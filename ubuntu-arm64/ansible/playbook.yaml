@@ -100,3 +100,10 @@
           disable:
           - apt-daily-upgrade.timer
           - apt-daily.timer
+
+  - name: "Cleanup"
+    ansible.builtin.shell: |
+      #!/bin/bash
+      set -eo pipefail
+
+      

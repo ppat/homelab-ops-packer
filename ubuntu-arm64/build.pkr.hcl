@@ -48,14 +48,31 @@ build {
   }
 
   provisioner "shell-local" {
+    env = {
+      ROOT_MOUNT_PATH = local.chroot_path
+    }
     inline = [
       "echo '**************************************************************************************'",
       "echo '===> Cleaning up...'",
-      "export CHROOT_PATH=${local.chroot_path}",
-      "export TARGET_ARCH=${var.target_architecture}",
-      "export FILES=\"${path.root}/scripts/cleanup.sh\"",
-      "export TARGET_SCRIPT=cleanup.sh",
-      "sudo ${path.root}/scripts/chroot-invoke.sh",
+      "rm $ROOT_MOUNT_PATH/etc/resolv.conf",
+      "echo '====> Cleaning up after apt...'",
+      "chroot $ROOT_MOUNT_PATH DEBIAN_FRONTEND=noninteractive apt-get autoremove -y",
+      "chroot $ROOT_MOUNT_PATH DEBIAN_FRONTEND=noninteractive apt-get clean -y",
+      "echo '======> Cleaning apt lists...'",
+      "find $ROOT_MOUNT_PATH/var/lib/apt/lists/* -type f -delete",
+      "echo '====> Removing kernel backups...'",
+      "find $ROOT_MOUNT_PATH/boot/ -name '*.bak' -print -delete || echo 'No /boot/firmware backups exist, skipping...'",
+      "echo '====> Cleaning temp python artifacts (from having run ansible)...'",
+      "find $ROOT_MOUNT_PATH/usr -type f -iname '*.pyc' -delete || echo 'could not delete all pyc files...'",
+      "find $ROOT_MOUNT_PATH/usr -type d -name '__pycache__' -print | xargs rm -rf",
+      "echo '====> Cleaning misc artifacts...'",
+      "find $ROOT_MOUNT_PATH/var -type f -iname '*.log' -delete || echo 'could not delete log files...'",
+      "echo '====> Clearing tmp...'",
+      "rm -rf $ROOT_MOUNT_PATH/tmp/* $ROOT_MOUNT_PATH/var/tmp/*",
+      "echo '====> Clearing var...'",
+      "rm -rf $ROOT_MOUNT_PATH/var/cache/* $ROOT_MOUNT_PATH/var/log/journal/*",
+      "echo '====> Clearing root home...'",
+      "rm -rf $ROOT_MOUNT_PATH/root/.cache $ROOT_MOUNT_PATH/root/.ansible $ROOT_MOUNT_PATH/root/.local $ROOT_MOUNT_PATH/root/.bash_history",
       "echo '**************************************************************************************'",
     ]
   }
