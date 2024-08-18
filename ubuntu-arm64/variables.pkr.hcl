@@ -3,10 +3,10 @@ variable "ansible_params" {
   default = {}
 }
 
-// variable "artifact_dir" {
-//   type    = string
-//   default = "${env("ARTIFACT_DIR")}"
-// }
+variable "artifact_dir" {
+  type    = string
+  default = "${env("ARTIFACT_DIR")}"
+}
 
 // variable "artifact_expected_size" {
 //   type    = string
@@ -48,10 +48,10 @@ variable "target_device" {
   default = "any"
 }
 
-// variable "temp_dir" {
-//   type    = string
-//   default = "${env("ARTIFACT_DIR")}/.temp"
-// }
+variable "temp_dir" {
+  type    = string
+  default = "${env("ARTIFACT_DIR")}/.temp"
+}
 
 variable "ubuntu_release" {
   type = string

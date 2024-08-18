@@ -1,13 +1,13 @@
 #!/bin/bash
 set -euo pipefail
 
-CHROOT_PATH="$1"
-TARGET_ARCH="$2"
-TARGET_SCRIPT="$3"
 CURRENT_ARCH="$(dpkg --print-architecture)"
-
 mkdir -p $CHROOT_PATH/tmp/scripts
-cp ./scripts/$TARGET_SCRIPT $CHROOT_PATH/tmp/scripts/
+
+for file in $FILES; do
+  echo "Copying file: $file..."
+  cp $file $CHROOT_PATH/tmp/scripts/
+done
 
 if [[ "$CURRENT_ARCH" == "$TARGET_ARCH" ]]; then
   echo "Current architecture ($CURRENT_ARCH) matches target architecture ($TARGET_ARCH), no emulation needed."

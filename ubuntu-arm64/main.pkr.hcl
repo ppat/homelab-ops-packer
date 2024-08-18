@@ -9,13 +9,6 @@ locals {
   build_boot_artifact = "${local.build_basename}-bootfs.tar.zst"
   build_checksum      = "${local.build_basename}.SHA256SUMS"
 
-  artifact_output_path      = "/tmp"
-  boot_firmware_source_path = "/mnt/boot-firmware"
-  chroot_path               = "/tmp/${local.build_basename}"
-  packer_root               = "${path.root}"
-
-  // artifact_output_path      = "${var.artifact_dir}/${local.build_artifact_path}"
-  // boot_firmware_source_path = "/mnt/boot-firmware"
-  // chroot_path               = "${var.temp_dir}/packer_chroot"
-  // packer_root               = "${path.root}"
+  artifact_output_path = "${var.artifact_dir}/${local.build_artifact_path}"
+  chroot_path          = "/tmp/${local.build_basename}"
 }
