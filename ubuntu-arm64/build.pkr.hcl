@@ -82,17 +82,17 @@ build {
   # -------------------------------- create images -------------------------------------
   provisioner "shell-local" {
     env = {
-      EXCLUDES_LIST     = "${path.root}/../scripts/artifact/image-excludes.list"
-      ROOT_MOUNT_PATH   = local.chroot_path
-      BOOT_MOUNT_PATH   = (var.target_architecture == "arm64") ? "/boot/firmware" : "/boot"
-      TEMP_ARTIFACT_DIR = var.temp_dir
-      ROOT_ARTIFACT     = "${var.temp_dir}/${local.build_root_artifact}"
-      BOOT_ARTIFACT     = "${var.temp_dir}/${local.build_boot_artifact}"
+      EXCLUDES_LIST   = "${path.root}/../scripts/artifact/image-excludes.list"
+      ROOT_MOUNT_PATH = local.chroot_path
+      BOOT_MOUNT_PATH = (var.target_architecture == "arm64") ? "/boot/firmware" : "/boot"
+      ARTIFACT_DIR    = local.artifact_output_path
+      ROOT_ARTIFACT   = "${local.artifact_output_path}/${local.build_root_artifact}"
+      BOOT_ARTIFACT   = "${local.artifact_output_path}/${local.build_boot_artifact}"
     }
     inline = [
       "echo '**************************************************************************************'",
       "echo '===> Creating artifacts...'",
-      "mkdir -p $TEMP_ARTIFACT_DIR",
+      "mkdir -p $ARTIFACT_DIR",
       "export ZSTD_NBTHREADS=4",
       "export ZSTD_CLEVEL=3",
       "echo '=====> Root artifact'",
@@ -101,14 +101,6 @@ build {
       "tar --exclude-from $EXCLUDES_LIST --zstd -C $BOOT_MOUNT_PATH -cf $BOOT_ARTIFACT ./",
       "echo '**************************************************************************************'"
     ]
-  }
-  provisioner "file" {
-    sources = [
-      "${var.temp_dir}/${local.build_root_artifact}",
-      "${var.temp_dir}/${local.build_boot_artifact}"
-    ]
-    destination = "${local.artifact_output_path}/"
-    direction   = "download"
   }
   # -------------------------------------------------------------------------------------
 
