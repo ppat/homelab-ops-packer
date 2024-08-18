@@ -92,6 +92,24 @@ jobs:
           echo "artifact_dir = \"${ARTIFACT_DIR}\""
         } >> $CONFIG_DIR/source.pkrvars.hcl
 
+    - name: Tailscale Connect
+      uses: tailscale/github-action@4e4c49acaa9818630ce0bd7a564372c17e33fb4d # v2
+      with:
+        oauth-client-id: ${{ secrets.TAILSCALE_OAUTH_CLIENT_ID }}
+        oauth-secret: ${{ secrets.TAILSCALE_OAUTH_SECRET }}
+        tags: tag:github-action-ci-runner
+        # renovate: datasource=github-releases depName=tailscale/tailscale
+        version: "1.70.0"
+
+    - name: Tailscale Debug
+      run: |
+        sudo -E tailscale netcheck --verbose 2>&1 | sed -f .output-filter
+        echo
+        sudo -E tailscale status 2>&1 | sed -f .output-filter
+        echo
+        sudo -E tailscale status --json --peers=false 2>&1 | sed -f .output-filter
+        echo
+
     - name: Packer init
       run: |
         packer init .
