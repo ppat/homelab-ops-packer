@@ -84,7 +84,7 @@ build {
     env = {
       EXCLUDES_LIST   = "${path.root}/../scripts/artifact/image-excludes.list"
       ROOT_MOUNT_PATH = local.chroot_path
-      BOOT_MOUNT_PATH = (var.target_architecture == "arm64") ? "/boot/firmware" : "/boot"
+      BOOT_MOUNT_PATH = (var.target_architecture == "arm64") ? "${local.chroot_path}/boot/firmware" : "${local.chroot_path}/boot"
       ARTIFACT_DIR    = local.artifact_output_path
       ROOT_ARTIFACT   = "${local.artifact_output_path}/${local.build_root_artifact}"
       BOOT_ARTIFACT   = "${local.artifact_output_path}/${local.build_boot_artifact}"
