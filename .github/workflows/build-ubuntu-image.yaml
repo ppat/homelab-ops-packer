@@ -53,7 +53,7 @@ jobs:
     - name: Install packer
       env:
         # renovate: datasource=github-releases depName=hashicorp/packer
-        PACKER_VERSION: "1.10.3"
+        PACKER_VERSION: "1.11.0"
       run: |
         wget --progress=dot:giga -c https://releases.hashicorp.com/packer/${PACKER_VERSION}/packer_${PACKER_VERSION}_linux_amd64.zip -O /tmp/packer.zip
         unzip /tmp/packer.zip
@@ -115,7 +115,7 @@ jobs:
         oauth-secret: ${{ secrets.TAILSCALE_OAUTH_SECRET }}
         tags: tag:github-action-ci-runner
         # renovate: datasource=github-releases depName=tailscale/tailscale
-        version: "1.70.0"
+        version: "1.72.1"
 
     - name: Tailscale Debug
       if: ${{ github.event_name == 'workflow_dispatch' && inputs.publish_artifact }}
