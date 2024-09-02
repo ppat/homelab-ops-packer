@@ -31,6 +31,7 @@ env:
 jobs:
   build-ubuntu-image:
     strategy:
+      fail-fast: false
       matrix:
         ubuntu_release: ["jammy", "noble"]
         arch_plus_device_type: ["arm64+raspi", "amd64"]
