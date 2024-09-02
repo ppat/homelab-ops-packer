@@ -38,9 +38,6 @@
       - wireguard
       - zstd
       by_release:
-        focal:
-          raspi: []
-          any: []
         jammy:
           raspi: ['linux-modules-extra-raspi']
           any:
