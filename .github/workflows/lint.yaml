@@ -72,7 +72,7 @@ jobs:
       if: steps.changed-files-yaml.outputs.packer_any_changed == 'true' || github.event_name == 'workflow_dispatch'
       env:
         # renovate: datasource=github-releases depName=hashicorp/packer
-        PACKER_VERSION: "1.11.0"
+        PACKER_VERSION: "1.11.2"
       run: |
         [[ "$RUNNER_ARCH" == "ARM64" ]] && export PKG_ARCH=arm64 || export PKG_ARCH=amd64
         wget --progress=dot:giga -c https://releases.hashicorp.com/packer/${PACKER_VERSION}/packer_${PACKER_VERSION}_linux_${PKG_ARCH}.zip -O /tmp/packer.zip
