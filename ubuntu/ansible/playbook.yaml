@@ -39,7 +39,8 @@
       - zstd
       by_release:
         jammy:
-          raspi: ['linux-modules-extra-raspi']
+          raspi:
+          - linux-modules-extra-raspi
           any:
           - efibootmgr
           - grub2-common
