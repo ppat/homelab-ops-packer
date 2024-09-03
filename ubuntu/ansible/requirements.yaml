@@ -1,4 +1,4 @@
 ---
 collections:
 - name: homelab_ops.os
-  version: 1.8.0
+  version: 1.8.1
