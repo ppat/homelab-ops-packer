@@ -33,7 +33,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        ubuntu_release: ["jammy", "noble"]
+        ubuntu_release: ["noble"]
         arch_plus_device_type: ["arm64+raspi", "amd64"]
     runs-on: ubuntu-latest
     timeout-minutes: 180
