@@ -35,7 +35,7 @@ jobs:
       matrix:
         ubuntu_release: ["noble"]
         arch_plus_device_type: ["arm64+raspi", "amd64"]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 180
     steps:
     - name: Checkout
