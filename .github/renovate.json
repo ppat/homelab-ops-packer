@@ -14,151 +14,18 @@
   ],
   "extends": [
     "config:best-practices",
-    "group:linters"
+    "group:linters",
+    "mergeConfidence:all-badges",
+    "github>ppat/renovate-presets:default-commit-message",
+    "github>ppat/renovate-presets:labels-dependency-type",
+    "github>ppat/renovate-presets:min-release-age",
+    "github>ppat/renovate-presets:automerge.json",
+    "github>ppat/renovate-presets:ci-dependencies",
+    "github>ppat/renovate-presets:ci-dev-tools",
+    "github>ppat/renovate-presets:ci-github-actions"
   ],
   "internalChecksFilter": "strict",
   "packageRules": [
-    {
-      "groupName": "github-action dependencies",
-      "groupSlug": "github-actions-deps",
-      "matchFileNames": [
-        ".github/workflows/**"
-      ],
-      "matchManagers": [
-        "github-actions"
-      ],
-      "minimumReleaseAge": "30 days",
-      "schedule": [
-        "before 10am on Tuesday",
-        "before 10am on Thursday"
-      ]
-    },
-    {
-      "automerge": true,
-      "groupName": "github-release non-major dependencies",
-      "groupSlug": "github-release-non-major-deps",
-      "matchDatasources": [
-        "github-releases"
-      ],
-      "matchUpdateTypes": [
-        "minor",
-        "patch"
-      ],
-      "minimumReleaseAge": "1 days"
-    },
-    {
-      "groupName": "github-release major dependencies",
-      "groupSlug": "github-release-deps",
-      "matchDatasources": [
-        "github-releases"
-      ],
-      "matchUpdateTypes": [
-        "major"
-      ],
-      "minimumReleaseAge": "30 days",
-      "schedule": [
-        "before 10am on Tuesday",
-        "before 10am on Thursday"
-      ]
-    },
-    {
-      "automerge": true,
-      "groupName": "npm non-major dependencies",
-      "groupSlug": "npm-deps-non-major",
-      "matchDatasources": [
-        "npm"
-      ],
-      "matchUpdateTypes": [
-        "minor",
-        "patch"
-      ],
-      "minimumReleaseAge": "1 days"
-    },
-    {
-      "groupName": "npm major dependencies",
-      "groupSlug": "npm-deps",
-      "matchDatasources": [
-        "npm"
-      ],
-      "matchUpdateTypes": [
-        "major"
-      ],
-      "minimumReleaseAge": "30 days",
-      "schedule": [
-        "before 10am on Tuesday",
-        "before 10am on Thursday"
-      ]
-    },
-    {
-      "automerge": true,
-      "groupName": "python non-major dependencies",
-      "groupSlug": "pypi-deps-non-major",
-      "matchDatasources": [
-        "pypi"
-      ],
-      "matchUpdateTypes": [
-        "minor",
-        "patch"
-      ],
-      "minimumReleaseAge": "1 days"
-    },
-    {
-      "groupName": "python major dependencies",
-      "groupSlug": "pypi-deps",
-      "matchDatasources": [
-        "pypi"
-      ],
-      "matchUpdateTypes": [
-        "major"
-      ],
-      "minimumReleaseAge": "30 days",
-      "schedule": [
-        "before 10am on Tuesday",
-        "before 10am on Thursday"
-      ]
-    },
-    {
-      "groupName": "pre-commit dependencies",
-      "groupSlug": "pre-commit-deps",
-      "matchManagers": [
-        "pre-commit"
-      ],
-      "minimumReleaseAge": "30 days"
-    },
-    {
-      "automerge": true,
-      "groupName": "galaxy-collection non-major dependencies",
-      "groupSlug": "galaxy-collection-non-major-deps",
-      "matchDatasources": [
-        "galaxy-collection"
-      ],
-      "matchUpdateTypes": [
-        "minor",
-        "patch"
-      ],
-      "minimumReleaseAge": "1 days",
-      "matchDepNames": [
-        "!homelab_ops.os"
-      ]
-    },
-    {
-      "groupName": "galaxy-collection major dependencies",
-      "groupSlug": "galaxy-collection-deps",
-      "matchDatasources": [
-        "galaxy-collection"
-      ],
-      "matchUpdateTypes": [
-        "major"
-      ],
-      "minimumReleaseAge": "30 days",
-      "schedule": [
-        "before 10am on Tuesday",
-        "before 10am on Thursday"
-      ],
-      "matchDepNames": [
-        "!homelab_ops.os"
-      ]
-    },
     {
       "groupName": "homelab_ops.os galaxy-collection",
       "groupSlug": "galaxy-collection-homelab_ops-os",
@@ -167,7 +34,8 @@
       ],
       "matchDepNames": [
         "homelab_ops.os"
-      ]
+      ],
+      "minimumReleaseAge": ""
     },
     {
       "automerge": true,
@@ -178,8 +46,7 @@
       ],
       "matchPackageNames": [
         "ansible-core",
-        "hashicorp/packer",
-        "mkaczanowski/packer-builder-arm"
+        "hashicorp/packer"
       ],
       "matchUpdateTypes": [
         "patch"
@@ -194,17 +61,12 @@
       ],
       "matchPackageNames": [
         "ansible-core",
-        "hashicorp/packer",
-        "mkaczanowski/packer-builder-arm"
+        "hashicorp/packer"
       ],
       "matchUpdateTypes": [
         "minor"
       ],
-      "minimumReleaseAge": "90 days",
-      "schedule": [
-        "before 10am on Tuesday",
-        "before 10am on Thursday"
-      ]
+      "minimumReleaseAge": "90 days"
     },
     {
       "description": "stability required dependencies: major versions",
@@ -214,27 +76,16 @@
       ],
       "matchPackageNames": [
         "ansible-core",
-        "hashicorp/packer",
-        "mkaczanowski/packer-builder-arm"
+        "hashicorp/packer"
       ],
       "matchUpdateTypes": [
         "major"
       ],
-      "minimumReleaseAge": "180 days",
-      "schedule": [
-        "before 10am on Tuesday",
-        "before 10am on Thursday"
-      ]
+      "minimumReleaseAge": "180 days"
     }
   ],
-  "prConcurrentLimit": 20,
-  "prHourlyLimit": 10,
-  "pre-commit": {
-    "enabled": true
-  },
+  "prConcurrentLimit": 0,
+  "prHourlyLimit": 0,
   "rebaseWhen": "behind-base-branch",
-  "semanticCommits": "enabled",
-  "separateMajorMinor": true,
-  "separateMultipleMajor": false,
   "timezone": "US/Eastern"
 }
