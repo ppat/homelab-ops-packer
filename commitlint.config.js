@@ -34,7 +34,9 @@ module.exports = {
     'scope-enum': [2, 'always',
       [
         '',
-        'deps'
+        'deps',
+        'dev-tools',
+        'github-actions'
       ]
     ],
 
