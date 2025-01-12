@@ -1,6 +1,6 @@
 ---
 # yamllint disable rule:line-length
-name: Lint all
+name: lint
 
 # yamllint disable-line rule:truthy
 on:
@@ -12,9 +12,22 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  lint:
+  detect-changes:
+    outputs:
+      actions_any_changed: ${{ steps.changed-files-yaml.outputs.actions_any_changed }}
+      actions_all_changed_files: ${{ steps.changed-files-yaml.outputs.actions_all_changed_files}}
+      ansible_any_changed: ${{ steps.changed-files-yaml.outputs.ansible_any_changed }}
+      ansible_all_changed_files: ${{ steps.changed-files-yaml.outputs.ansible_all_changed_files}}
+      packer_any_changed: ${{ steps.changed-files-yaml.outputs.packer_any_changed }}
+      packer_all_changed_files: ${{ steps.changed-files-yaml.outputs.packer_all_changed_files}}
+      renovate_any_changed: ${{ steps.changed-files-yaml.outputs.renovate_any_changed }}
+      renovate_all_changed_files: ${{ steps.changed-files-yaml.outputs.renovate_all_changed_files}}
+      shellscripts_any_changed: ${{ steps.changed-files-yaml.outputs.shellscripts_any_changed }}
+      shellscripts_all_changed_files: ${{ steps.changed-files-yaml.outputs.shellscripts_all_changed_files}}
+      yaml_any_changed: ${{ steps.changed-files-yaml.outputs.yaml_any_changed }}
+      yaml_all_changed_files: ${{ steps.changed-files-yaml.outputs.yaml_all_changed_files}}
     runs-on: ubuntu-24.04
-    timeout-minutes: 10
+    timeout-minutes: 5
     steps:
     - name: Checkout
       uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
@@ -28,15 +41,78 @@ jobs:
         files_yaml: |
           actions:
           - .github/workflows/**
-          - .shellcheckrc
-          renovate:
-          - .github/renovate.json
           ansible:
           - '**.yaml'
+          - '**.yml'
+          - '**.j2'
           - '!.github/**'
           - '!.pre-commit-config.yaml'
           packer:
           - '**.pkr.hcl'
+          renovate:
+          - .github/renovate.json
+          - .github/renovate/**
+          shellscripts:
+          - '**.sh'
+          yaml:
+          - '**.yaml'
+
+  commit-messages:
+    if: ${{ github.event_name == 'pull_request' }}
+    uses: ppat/github-workflows/.github/workflows/lint-commit-messages.yaml@main
+    with:
+      git_ref: ${{ github.head_ref }}
+      fetch_depth: ${{ github.event.pull_request.commits }}
+      from: ${{ github.event.pull_request.head.sha }}~${{ github.event.pull_request.commits }}
+      to: ${{ github.event.pull_request.head.sha }}
+
+  github-actions:
+    needs: [detect-changes]
+    if: ${{ github.event_name == 'workflow_dispatch' || needs.detect-changes.outputs.actions_any_changed == 'true' }}
+    uses: ppat/github-workflows/.github/workflows/lint-github-actions.yaml@main
+    with:
+      git_ref: ${{ github.head_ref || github.ref }}
+      files: ${{ github.event_name == 'workflow_dispatch' && 'ALL' || needs.detect-changes.outputs.actions_all_changed_files }}
+
+  pre-commit:
+    uses: ppat/github-workflows/.github/workflows/lint-pre-commit.yaml@main
+    with:
+      git_ref: ${{ github.head_ref || github.ref }}
+
+  renovate-config-check:
+    needs: [detect-changes]
+    if: ${{ github.event_name == 'workflow_dispatch' || needs.detect-changes.outputs.renovate_any_changed == 'true' }}
+    uses: ppat/github-workflows/.github/workflows/lint-renovate-config-check.yaml@main
+    with:
+      git_ref: ${{ github.head_ref || github.ref }}
+      files: ${{ github.event_name == 'workflow_dispatch' && 'ALL' || needs.detect-changes.outputs.renovate_all_changed_files }}
+
+  shellcheck:
+    needs: [detect-changes]
+    if: ${{ github.event_name == 'workflow_dispatch' || needs.detect-changes.outputs.shellscripts_any_changed == 'true' }}
+    uses: ppat/github-workflows/.github/workflows/lint-shellcheck.yaml@main
+    with:
+      git_ref: ${{ github.head_ref || github.ref }}
+      files: ${{ github.event_name == 'workflow_dispatch' && 'ALL' || needs.detect-changes.outputs.shellscripts_all_changed_files }}
+
+  yaml:
+    needs: [detect-changes]
+    if: ${{ github.event_name == 'workflow_dispatch' || needs.detect-changes.outputs.yaml_any_changed == 'true' }}
+    uses: ppat/github-workflows/.github/workflows/lint-yaml.yaml@main
+    with:
+      git_ref: ${{ github.head_ref || github.ref }}
+      files: ${{ github.event_name == 'workflow_dispatch' && 'ALL' || needs.detect-changes.outputs.yaml_all_changed_files }}
+
+  ansible-lint:
+    needs: [detect-changes]
+    if: ${{ github.event_name == 'workflow_dispatch' || needs.detect-changes.outputs.ansible_any_changed == 'true' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+    - name: Checkout
+      uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+      with:
+        fetch-depth: 0
 
     - name: Set up python
       uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b # v5
@@ -46,12 +122,45 @@ jobs:
         cache-dependency-path: |
           requirements.txt
 
-    - name: Set up node
-      uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4
+    - name: Install python requirements
+      run: python -m pip install -r requirements.txt
+
+    - name: ansible-lint
+      run: |
+        ansible-lint -c .ansible-lint -i .ansible-lint-ignore --skip-list=yaml --force-color .
+
+  packer:
+    needs: [detect-changes]
+    if: ${{ github.event_name == 'workflow_dispatch' || needs.detect-changes.outputs.packer_any_changed == 'true' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+    - name: Checkout
+      uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
       with:
-        node-version-file: '.node-version'
-        cache: 'npm'
-        cache-dependency-path: 'package-lock.json'
+        fetch-depth: 0
+
+    - name: Install packer
+      env:
+        # renovate: datasource=github-releases depName=hashicorp/packer
+        PACKER_VERSION: "1.11.2"
+      run: |
+        wget --progress=dot:giga -c https://releases.hashicorp.com/packer/${PACKER_VERSION}/packer_${PACKER_VERSION}_linux_amd64.zip -O /tmp/packer.zip
+        unzip /tmp/packer.zip
+        sudo install -o root -g root -m 0755 /tmp/packer /usr/local/sbin/packer
+      working-directory: /tmp
+
+    - name: packer-fmt
+      run: |
+        packer fmt -recursive -check .
+
+    - name: Set up python
+      uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b # v5
+      with:
+        python-version: '3.12'
+        cache: 'pip'
+        cache-dependency-path: |
+          requirements.txt
 
     - name: Cache pre-commit hooks
       uses: actions/cache@1bd1e32a3bdc45362d1e726936510720a7c30a57 # v4
@@ -62,105 +171,9 @@ jobs:
     - name: Install python requirements
       run: python -m pip install -r requirements.txt
 
-    - name: Install node packages
-      run: npm ci --no-fund --no-audit
-
     - name: Install pre-commit hooks
       run: pre-commit install --install-hooks --hook-type pre-commit
 
-    - name: Install packer
-      if: steps.changed-files-yaml.outputs.packer_any_changed == 'true' || github.event_name == 'workflow_dispatch'
-      env:
-        # renovate: datasource=github-releases depName=hashicorp/packer
-        PACKER_VERSION: "1.11.2"
-      run: |
-        [[ "$RUNNER_ARCH" == "ARM64" ]] && export PKG_ARCH=arm64 || export PKG_ARCH=amd64
-        wget --progress=dot:giga -c https://releases.hashicorp.com/packer/${PACKER_VERSION}/packer_${PACKER_VERSION}_linux_${PKG_ARCH}.zip -O /tmp/packer.zip
-        unzip /tmp/packer.zip
-        sudo install -o root -g root -m 0755 /tmp/packer /usr/local/sbin/packer
-      working-directory: /tmp
-
-    - name: check-added-large-files
-      run: pre-commit run --all-files --color=always check-added-large-files
-
-    - name: check-executables-have-shebangs
-      if: success() || failure()
-      run: pre-commit run --all-files --color=always check-executables-have-shebangs
-
-    - name: check-json
-      if: success() || failure()
-      run: pre-commit run --all-files --color=always check-json
-
-    - name: check-shebang-scripts-are-executable
-      if: success() || failure()
-      run: pre-commit run --all-files --color=always check-shebang-scripts-are-executable
-
-    - name: detect-private-key
-      if: success() || failure()
-      run: pre-commit run --all-files --color=always detect-private-key
-
-    - name: end-of-file-fixer
-      if: success() || failure()
-      run: pre-commit run --all-files --color=always end-of-file-fixer
-
-    - name: forbid-new-submodules
-      if: success() || failure()
-      run: pre-commit run --all-files --color=always forbid-new-submodules
-
-    - name: mixed-line-ending
-      if: success() || failure()
-      run: pre-commit run --all-files --color=always mixed-line-ending
-
-    - name: trailing-whitespace
-      if: success() || failure()
-      run: pre-commit run --all-files --color=always trailing-whitespace
-
-    - name: shellcheck
-      if: success() || failure()
-      run: pre-commit run --all-files --color=always shellcheck
-
-    - name: yamllint
-      if: success() || failure()
-      run: yamllint -c .yamllint --strict --format github .
-
-    - name: packer-fmt
-      if: (success() || failure()) && (steps.changed-files-yaml.outputs.packer_any_changed == 'true' || github.event_name == 'workflow_dispatch')
-      run: |
-        packer fmt -recursive -check .
-
     - name: packer-validate
-      if: (success() || failure()) && (steps.changed-files-yaml.outputs.packer_any_changed == 'true' || github.event_name == 'workflow_dispatch')
       run: |
         pre-commit run --all-files packer-validate
-
-    - name: actionlint
-      if: (success() || failure()) && (steps.changed-files-yaml.outputs.actions_any_changed == 'true' || github.event_name == 'workflow_dispatch')
-      shell: bash
-      run: |
-        [[ "$RUNNER_ARCH" == "ARM64" ]] && export PKG_ARCH=arm64 || export PKG_ARCH=amd64
-        wget --quiet -c https://github.com/rhysd/actionlint/releases/download/v${ACTIONLINT_VERSION}/actionlint_${ACTIONLINT_VERSION}_linux_${PKG_ARCH}.tar.gz -O /tmp/actionlint.tar.gz
-        tar -xzf /tmp/actionlint.tar.gz -C /tmp
-        sudo install -o root -g root -m 0755 /tmp/actionlint /usr/local/sbin/actionlint
-        set -x
-        actionlint -shellcheck "shellcheck -c .shellcheckrc"
-      env:
-        # renovate: datasource=github-releases depName=rhysd/actionlint
-        ACTIONLINT_VERSION: "1.7.4"
-
-    - name: commitlint
-      if: (success() || failure()) && (github.event_name == 'pull_request')
-      run: npx commitlint --color --from ${{ github.event.pull_request.head.sha }}~${{ github.event.pull_request.commits }} --to ${{ github.event.pull_request.head.sha }} --verbose
-
-    - name: validate-renovate-config
-      if: (success() || failure()) && (steps.changed-files-yaml.outputs.renovate_any_changed == 'true' || github.event_name == 'workflow_dispatch')
-      shell: bash
-      run: |
-        npm install --no-fund --no-audit renovate
-        npx --yes --package renovate -- renovate-config-validator
-
-    - name: ansible-lint
-      if: (success() || failure()) && (steps.changed-files-yaml.outputs.ansible_any_changed == 'true' || github.event_name == 'workflow_dispatch')
-      env:
-        changes_output: ${{ toJson(steps.changed-files-yaml.outputs) }}
-      run: |
-        ansible-lint -c .ansible-lint -i .ansible-lint-ignore --skip-list=yaml --force-color .
