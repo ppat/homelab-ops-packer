@@ -36,7 +36,8 @@ module.exports = {
         '',
         'deps',
         'dev-tools',
-        'github-actions'
+        'github-actions',
+        'renovate'
       ]
     ],
 
