@@ -28,6 +28,8 @@ env:
   PACKER_CACHE_DIR: /home/runner/.build/cache/packer
   PACKER_LOG: 1
 
+permissions: {}
+
 jobs:
   build-ubuntu-image:
     strategy:
@@ -37,6 +39,7 @@ jobs:
         arch_plus_device_type: ["arm64+raspi", "amd64"]
     runs-on: ubuntu-24.04
     timeout-minutes: 180
+    environment: release
     steps:
     - name: Checkout
       uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
