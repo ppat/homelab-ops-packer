@@ -110,7 +110,7 @@ jobs:
 
     - name: Tailscale Connect
       if: ${{ github.event_name == 'workflow_dispatch' && inputs.publish_artifact }}
-      uses: tailscale/github-action@8688eb839e58e6b25c1ae96cd99d1c173299b842 # v3
+      uses: tailscale/github-action@93605f7b8f223bf5f44e83275e64fb28f3e49d9e # v3
       with:
         oauth-client-id: ${{ secrets.TAILSCALE_OAUTH_CLIENT_ID }}
         oauth-secret: ${{ secrets.TAILSCALE_OAUTH_SECRET }}
