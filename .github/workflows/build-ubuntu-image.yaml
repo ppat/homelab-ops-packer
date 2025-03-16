@@ -68,7 +68,7 @@ jobs:
     - name: Install ansible
       run: |
         # install globally as we need to run packer build with sudo, so installing just for current user won't work
-        sudo pip install -r ./requirements.txt
+        sudo pip install -r ./requirements.txt --ignore-installed
 
     - name: Prepare directories + parameters file
       env:
