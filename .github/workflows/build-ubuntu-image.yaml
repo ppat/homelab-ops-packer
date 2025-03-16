@@ -28,7 +28,8 @@ env:
   PACKER_CACHE_DIR: /home/runner/.build/cache/packer
   PACKER_LOG: 1
 
-permissions: {}
+permissions:
+  contents: read
 
 jobs:
   build-ubuntu-image:
