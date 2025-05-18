@@ -46,9 +46,9 @@ jobs:
       uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
     - name: Set up python
-      uses: actions/setup-python@42375524e23c412d93fb67b49958b491fce71c38 # v5
+      uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
       with:
-        python-version: '3.12'
+        python-version: '3.13'
 
     - name: Install system packages
       run: |
@@ -114,7 +114,7 @@ jobs:
 
     - name: Tailscale Connect
       if: ${{ github.event_name == 'workflow_dispatch' && inputs.publish_artifact }}
-      uses: tailscale/github-action@8688eb839e58e6b25c1ae96cd99d1c173299b842 # v3
+      uses: tailscale/github-action@5d536117a7378beffcd6d8523ce73c50fa98684d # v3
       with:
         oauth-client-id: ${{ secrets.TAILSCALE_OAUTH_CLIENT_ID }}
         oauth-secret: ${{ secrets.TAILSCALE_OAUTH_SECRET }}
