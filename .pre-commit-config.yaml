@@ -40,6 +40,6 @@ repos:
     - 'commitlint-plugin-function-rules@4.0.0'
     args: ['--verbose']
 - repo: https://github.com/gruntwork-io/pre-commit
-  rev: v0.1.29
+  rev: v0.1.30
   hooks:
   - id: packer-validate
