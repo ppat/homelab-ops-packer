@@ -27,6 +27,7 @@ jobs:
         - '**.yml'
         - '**.j2'
         - '!.github/**'
+        - '!.markdownlint-cli2.yaml'
         - '!.pre-commit-config.yaml'
         - '.ansible-lint'
         markdown:
