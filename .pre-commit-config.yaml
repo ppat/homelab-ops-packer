@@ -25,6 +25,11 @@ repos:
     args: ["--skip-list=yaml,jinja"]
     stages:
     - manual
+- repo: https://github.com/DavidAnson/markdownlint-cli2
+  rev: v0.18.1
+  hooks:
+  - id: markdownlint-cli2
+    args: ["--fix", "--config", ".markdownlint-cli2.yaml"]
 - repo: https://github.com/koalaman/shellcheck-precommit
   rev: v0.10.0
   hooks:
@@ -35,10 +40,10 @@ repos:
   - id: commitlint
     stages: [commit-msg]
     additional_dependencies:
-    - '@commitlint/config-conventional@19.2.2'
-    - '@commitlint/ensure@19.0.3'
-    - 'commitlint-plugin-function-rules@4.0.0'
-    args: ['--verbose']
+    - '@commitlint/cli@19.8.1'
+    - '@commitlint/config-conventional@19.8.1'
+    - '@commitlint/ensure@19.8.1'
+    - 'commitlint-plugin-function-rules@4.0.2'
 - repo: https://github.com/gruntwork-io/pre-commit
   rev: v0.1.30
   hooks:
