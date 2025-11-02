@@ -123,7 +123,7 @@ jobs:
         oauth-secret: ${{ secrets.TAILSCALE_OAUTH_SECRET }}
         tags: tag:github-action-ci-runner
         # renovate: datasource=github-releases depName=tailscale/tailscale
-        version: "1.88.3"
+        version: "1.90.2"
 
     - name: Tailscale Debug
       if: ${{ github.event_name == 'workflow_dispatch' && inputs.publish_artifact }}
